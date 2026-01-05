@@ -1,6 +1,6 @@
-using ValidationFramework.Core;
+using ValidationFramework.Result;
 
-namespace ValidationFramework.Core
+namespace ValidationFramework.Validator
 {
     public class LengthValidator : IValidator
     {

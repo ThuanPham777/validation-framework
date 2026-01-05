@@ -1,4 +1,4 @@
-using ValidationFramework.Core;
+using ValidationFramework.Result;
 
 namespace ValidationFramework.Notification;
 

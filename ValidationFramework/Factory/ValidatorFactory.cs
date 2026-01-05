@@ -1,5 +1,5 @@
 using ValidationFramework.Attributes;
-using ValidationFramework.Core;
+using ValidationFramework.Validator;
 
 namespace ValidationFramework.Core
 {

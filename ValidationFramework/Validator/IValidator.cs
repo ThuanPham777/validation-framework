@@ -1,4 +1,6 @@
-namespace ValidationFramework.Core
+using ValidationFramework.Result;
+
+namespace ValidationFramework.Validator
 {
     public interface IValidator
     {

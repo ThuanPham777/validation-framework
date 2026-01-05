@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using ValidationFramework.Core;
+using ValidationFramework.Result;
 
 namespace ValidationFramework.Notification
 {

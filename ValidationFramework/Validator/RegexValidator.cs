@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
-using ValidationFramework.Core;
+using ValidationFramework.Result;
 
-namespace ValidationFramework.Core
+namespace ValidationFramework.Validator
 {
     public class RegexValidator : IValidator
     {

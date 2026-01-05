@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using ValidationFramework.Core;
+using ValidationFramework.Result;
+using ValidationFramework.Validator;
 
 namespace ValidationFramework.Core
 {
