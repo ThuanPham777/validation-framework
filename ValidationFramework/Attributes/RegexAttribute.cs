@@ -7,4 +7,6 @@ public sealed class RegexAttribute : ValidationAttribute
     {
         Pattern = pattern;
     }
+
+    public override Core.IValidator CreateValidator() => new Core.RegexValidator(Pattern);
 }

@@ -4,4 +4,5 @@ namespace ValidationFramework.Attributes;
 public abstract class ValidationAttribute : Attribute
 {
     public string ErrorMessage { get; init; } = "Invalid";
+    public abstract Core.IValidator CreateValidator();
 }
