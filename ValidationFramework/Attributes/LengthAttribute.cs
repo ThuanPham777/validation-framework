@@ -1,3 +1,5 @@
+using ValidationFramework.Validator;
+
 namespace ValidationFramework.Attributes;
 
 public sealed class LengthAttribute : ValidationAttribute
@@ -10,4 +12,6 @@ public sealed class LengthAttribute : ValidationAttribute
         Min = min;
         Max = max;
     }
+
+    public override IValidator CreateValidator() => new Core.LengthValidator(Min, Max);
 }
