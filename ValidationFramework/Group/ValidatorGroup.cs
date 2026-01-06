@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using ValidationFramework.Result;
 using ValidationFramework.Validator;
 
-namespace ValidationFramework.Core
+namespace ValidationFramework.Group
 {
     public class ValidatorGroup : IValidator
     {

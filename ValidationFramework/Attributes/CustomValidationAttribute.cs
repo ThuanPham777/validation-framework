@@ -9,10 +9,10 @@ public sealed class CustomValidationAttribute : ValidationAttribute
         ValidatorType = validatorType ?? throw new ArgumentNullException(nameof(validatorType));
     }
 
-    public override Core.IValidator CreateValidator()
+    public override Validator.IValidator CreateValidator()
     {
-        if (!typeof(Core.IValidator).IsAssignableFrom(ValidatorType))
+        if (!typeof(Validator.IValidator).IsAssignableFrom(ValidatorType))
             throw new InvalidOperationException($"{ValidatorType.Name} must implement IValidator");
-        return (Core.IValidator)Activator.CreateInstance(ValidatorType)!;
+        return (Validator.IValidator)Activator.CreateInstance(ValidatorType)!;
     }
 }

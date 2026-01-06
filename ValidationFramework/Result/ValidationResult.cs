@@ -1,4 +1,4 @@
-namespace ValidationFramework.Core;
+namespace ValidationFramework.Result;
 
 public sealed class ValidationResult
 {

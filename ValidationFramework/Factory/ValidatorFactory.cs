@@ -1,7 +1,7 @@
 using ValidationFramework.Attributes;
 using ValidationFramework.Validator;
 
-namespace ValidationFramework.Core
+namespace ValidationFramework.Factory
 {
     public class ValidatorFactory
     {

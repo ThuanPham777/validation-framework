@@ -13,5 +13,5 @@ public sealed class LengthAttribute : ValidationAttribute
         Max = max;
     }
 
-    public override IValidator CreateValidator() => new Core.LengthValidator(Min, Max);
+    public override IValidator CreateValidator() => new LengthValidator(Min, Max);
 }

@@ -4,5 +4,5 @@ namespace ValidationFramework.Attributes;
 
 public sealed class RequiredAttribute : ValidationAttribute
 {
-	public override IValidator CreateValidator() => new Core.RequiredValidator();
+	public override IValidator CreateValidator() => new RequiredValidator();
 }
