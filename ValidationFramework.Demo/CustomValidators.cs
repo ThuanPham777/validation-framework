@@ -1,4 +1,5 @@
-using ValidationFramework.Core;
+using ValidationFramework.Validator;
+using ValidationFramework.Result;
 
 namespace ValidationFramework.Demo
 {

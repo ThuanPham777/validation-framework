@@ -2,6 +2,9 @@
 using System;
 using ValidationFramework.Attributes;
 using ValidationFramework.Core;
+using ValidationFramework.Result;
+using ValidationFramework.Group;
+using ValidationFramework.Validator;
 using ValidationFramework.Notification;
 using System.Collections.Generic;
 using ValidationFramework.Demo;
@@ -24,7 +27,7 @@ namespace ValidationFramework.Demo
 	{
 		public ValidationResult Validate(object value, string propertyName)
 		{
-			if (value is string s && System.Text.RegularExpressions.Regex.IsMatch(s, @"\d"))
+			if (value is string s && System.Text.RegularExpressions.Regex.IsMatch(s, "\\d"))
 				return ValidationResult.Fail(propertyName, $"{propertyName} must not contain digits.");
 			return ValidationResult.Ok(propertyName);
 		}
