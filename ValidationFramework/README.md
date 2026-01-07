@@ -1,4 +1,4 @@
-# ValidationFramework
+﻿# ValidationFramework
 
 A comprehensive, extensible validation framework for .NET applications supporting multiple validation strategies and UI frameworks.
 
@@ -6,7 +6,7 @@ A comprehensive, extensible validation framework for .NET applications supportin
 [![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4)](https://dotnet.microsoft.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## ?? Overview
+## 🎯 Overview
 
 ValidationFramework provides a flexible, powerful validation system that supports:
 - **Attribute-Based Validation** - Declarative validation using attributes
@@ -15,18 +15,18 @@ ValidationFramework provides a flexible, powerful validation system that support
 - **Multi-Platform** - Console, WinForms, WinUI, WPF
 - **Extensible Notification System** - Flexible UI feedback
 
-## ? Key Features
+## ✨ Key Features
 
-- ? **Multiple Validation Strategies** - Choose attribute-based, fluent API, or both
-- ? **Type-Safe Fluent API** - Compile-time checking with IntelliSense support
-- ? **Extensible Architecture** - Easy to add custom validators and rules
-- ? **UI Framework Agnostic** - Works with any .NET UI framework
-- ? **Notification System** - Publish/subscribe pattern for validation results
-- ? **Composable Validators** - Combine validators with AND, OR, NOT logic
-- ? **Async Support** - Handle database and API validations
-- ? **Modern .NET** - Supports .NET 8 and .NET 9
+- ✅ **Multiple Validation Strategies** - Choose attribute-based, fluent API, or both
+- ✅ **Type-Safe Fluent API** - Compile-time checking with IntelliSense support
+- ✅ **Extensible Architecture** - Easy to add custom validators and rules
+- ✅ **UI Framework Agnostic** - Works with any .NET UI framework
+- ✅ **Notification System** - Publish/subscribe pattern for validation results
+- ✅ **Composable Validators** - Combine validators with AND, OR, NOT logic
+- ✅ **Async Support** - Handle database and API validations
+- ✅ **Modern .NET** - Supports .NET 8 and .NET 9
 
-## ?? Quick Start
+## 🚀 Quick Start
 
 ### Attribute-Based Validation
 
@@ -59,18 +59,18 @@ using ValidationFramework.Extensions;
 public class UserValidator : AbstractValidator<User>
 {
     public UserValidator()
-    {
+  {
         RuleFor(u => u.Username)
-       .Required()
+            .Required()
             .Length(3, 20)
-       .AlphaNumeric();
+    .AlphaNumeric();
 
-    RuleFor(u => u.Email)
-   .Required()
-      .Email();
+     RuleFor(u => u.Email)
+            .Required()
+            .Email();
 
         RuleFor(u => u.Age)
-   .Range(18, 120);
+     .Range(18, 120);
     }
 }
 
@@ -91,7 +91,7 @@ public class User
 
     [Required]
     [Email]
-    public string Email { get; set; }
+public string Email { get; set; }
     
     public string Password { get; set; }
 }
@@ -101,17 +101,17 @@ var engine = new ValidationEngine();
 engine.AddFluentValidator<User>(builder =>
 {
     builder.For(u => u.Password)
-        .Required()
+     .Required()
         .MinLength(8)
         .Custom(p => p.Any(char.IsUpper), "Must contain uppercase")
-        .Custom(p => p.Any(char.IsDigit), "Must contain digit");
+     .Custom(p => p.Any(char.IsDigit), "Must contain digit");
 });
 
 // Validates both attribute and fluent rules
 var results = engine.ValidateWithFluent(user);
 ```
 
-## ?? Components
+## 📦 Components
 
 ### Core Components
 
@@ -175,14 +175,12 @@ var results = engine.ValidateWithFluent(user);
 | **Common Rules** | Reusable validation rule factories |
 | **Delegate Validators** | Quick inline validators |
 
-## ?? Documentation
+## 📚 Documentation
 
-- **[Complete Documentation](ValidationFramework/DOCUMENTATION.md)** - Comprehensive guide
-- **[Quick Start Guide](ValidationFramework/Fluent/QUICKSTART.md)** - 5-minute introduction
-- **[Migration Guide](ValidationFramework/Fluent/MIGRATION_GUIDE.md)** - Migrate from attributes to fluent
-- **[API Reference](ValidationFramework/DOCUMENTATION.md#api-reference)** - Complete API documentation
+- **[Complete Documentation](DOCUMENTATION.md)** - Comprehensive guide
+- **[API Reference](DOCUMENTATION.md#api-reference)** - Complete API documentation
 
-## ?? Examples
+## 💡 Examples
 
 ### Example 1: ValidatorBuilder
 
@@ -216,7 +214,7 @@ public class NoDigitValidator : IValidator
     public ValidationResult Validate(object value, string propertyName)
     {
         if (value is string s && Regex.IsMatch(s, @"\d"))
-            return ValidationResult.Fail(propertyName, "Must not contain digits");
+    return ValidationResult.Fail(propertyName, "Must not contain digits");
         return ValidationResult.Ok(propertyName);
     }
 }
@@ -274,14 +272,14 @@ var result = await uniqueUsername.ValidateAsync("john", "Username");
 var customAsync = AsyncValidators.CustomAsync<string>(
     async username =>
     {
-        await Task.Delay(100); // Simulate DB call
-        return !existingUsernames.Contains(username);
+   await Task.Delay(100); // Simulate DB call
+    return !existingUsernames.Contains(username);
     },
-    "Username is already taken"
+"Username is already taken"
 );
 ```
 
-## ?? Demo Applications
+## 🎨 Demo Applications
 
 ### Console Demo
 **Location:** `ValidationFramework.Demo`
@@ -329,55 +327,55 @@ cd ValidationFramework.Demo.WinUI
 dotnet run
 ```
 
-## ??? Architecture
+## 🏗️ Architecture
 
 ```
 ValidationFramework/
-??? Attributes/            # Attribute-based validation
-?   ??? RequiredAttribute
-? ??? EmailAttribute
-?   ??? LengthAttribute
-?   ??? PhoneAttribute
-?   ??? RegexAttribute
-?   ??? CustomValidationAttribute
-??? Validator/               # Core validators
-?   ??? IValidator
-?   ??? RequiredValidator
-?   ??? EmailValidator
-?   ??? LengthValidator
-?   ??? PhoneValidator
-?   ??? RegexValidator
-?   ??? DelegateValidator
-??? Fluent/                # Fluent validation API
-?   ??? IFluentValidator
-?   ??? ValidatorBuilder
-?   ??? PropertyValidator
-?   ??? AbstractValidator
-?   ??? Rules/
-?   ?   ??? CommonRules
-?   ??? Composite/
-?   ?   ??? CompositeValidators
-?   ??? Async/
-?       ??? AsyncValidators
-??? Core/   # Core engine
-?   ??? ValidationEngine
-??? Result/ # Validation results
-?   ??? ValidationResult
-??? Notification/            # Notification system
-?   ??? IValidationNotifierSubscriber
-?   ??? NotificationPublisher
-?   ??? ValidationEventType
-?   ??? Notifiers
-??? Extensions/   # Extension methods
-?   ??? ValidationEngineExtensions
-?   ??? PropertyValidatorExtensions
-??? Group/    # Validator grouping
-?   ??? ValidatorGroup
-??? Factory/               # Validator factory
-    ??? ValidatorFactory
+├── Attributes/            # Attribute-based validation
+│   ├── RequiredAttribute
+│   ├── EmailAttribute
+│   ├── LengthAttribute
+│   ├── PhoneAttribute
+│   ├── RegexAttribute
+│   └── CustomValidationAttribute
+├── Validator/    # Core validators
+│   ├── IValidator
+│   ├── RequiredValidator
+│   ├── EmailValidator
+│   ├── LengthValidator
+│   ├── PhoneValidator
+│   ├── RegexValidator
+│   └── DelegateValidator
+├── Fluent/            # Fluent validation API
+│   ├── IFluentValidator
+│   ├── ValidatorBuilder
+│   ├── PropertyValidator
+│   ├── AbstractValidator
+│   ├── Rules/
+│   │ └── CommonRules
+│   ├── Composite/
+│   │   └── CompositeValidators
+│   └── Async/
+│       └── AsyncValidators
+├── Core/    # Core engine
+│   └── ValidationEngine
+├── Result/        # Validation results
+│   └── ValidationResult
+├── Notification/    # Notification system
+│   ├── IValidationNotifierSubscriber
+│   ├── NotificationPublisher
+│   ├── ValidationEventType
+│   └── Notifiers
+├── Extensions/            # Extension methods
+│   ├── ValidationEngineExtensions
+│   └── PropertyValidatorExtensions
+├── Group/         # Validator grouping
+│   └── ValidatorGroup
+└── Factory/  # Validator factory
+    └── ValidatorFactory
 ```
 
-## ?? Testing
+## 🧪 Testing
 
 Example test structure:
 
@@ -389,43 +387,43 @@ public void UserValidator_InvalidEmail_ShouldFail()
     var validator = new UserValidator();
     var user = new User { Email = "invalid-email" };
     
- // Act
+    // Act
     var results = validator.Validate(user);
     
     // Assert
     Assert.NotEmpty(results.Where(r => 
- !r.IsValid && r.PropertyName == "Email"));
+        !r.IsValid && r.PropertyName == "Email"));
 }
 ```
 
 See `ValidationFramework\Tests\FluentValidationTests.cs` for more examples.
 
-## ?? Use Cases
+## 🎯 Use Cases
 
 ### When to Use Attribute-Based Validation
 
-? Simple validations (Required, Email, Length)
-? Quick prototyping
-? Declarative approach preferred
-? Rules unlikely to change
+✅ Simple validations (Required, Email, Length)
+✅ Quick prototyping
+✅ Declarative approach preferred
+✅ Rules unlikely to change
 
 ### When to Use Fluent Validation
 
-? Complex validation logic
-? Multiple conditions per property
-? Cross-property validation
-? Reusable validator classes
-? Unit testing validators
-? Type-safe validation
+✅ Complex validation logic
+✅ Multiple conditions per property
+✅ Cross-property validation
+✅ Reusable validator classes
+✅ Unit testing validators
+✅ Type-safe validation
 
 ### When to Use Hybrid Approach
 
-? Most real-world applications
-? Simple rules as attributes
-? Complex rules as fluent
-? Best of both worlds
+✅ Most real-world applications
+✅ Simple rules as attributes
+✅ Complex rules as fluent
+✅ Best of both worlds
 
-## ??? Extensibility
+## 🛠️ Extensibility
 
 ### Create Custom Attribute
 
@@ -433,16 +431,16 @@ See `ValidationFramework\Tests\FluentValidationTests.cs` for more examples.
 public sealed class RangeAttribute : ValidationAttribute
 {
     public int Min { get; init; }
-  public int Max { get; init; }
+    public int Max { get; init; }
 
     public RangeAttribute(int min, int max)
     {
-    Min = min;
-        Max = max;
+   Min = min;
+     Max = max;
     }
 
     public override IValidator CreateValidator() 
-        => new RangeValidator(Min, Max);
+     => new RangeValidator(Min, Max);
 }
 ```
 
@@ -456,16 +454,16 @@ public class StrongPasswordValidator : IValidator
         if (value is not string password)
             return ValidationResult.Ok(propertyName);
 
-if (password.Length < 8)
+ if (password.Length < 8)
             return ValidationResult.Fail(propertyName, "Min 8 characters");
 
         if (!password.Any(char.IsUpper))
-            return ValidationResult.Fail(propertyName, "Need uppercase");
+          return ValidationResult.Fail(propertyName, "Need uppercase");
 
   if (!password.Any(char.IsDigit))
-          return ValidationResult.Fail(propertyName, "Need digit");
+     return ValidationResult.Fail(propertyName, "Need digit");
 
-    return ValidationResult.Ok(propertyName);
+        return ValidationResult.Ok(propertyName);
     }
 }
 ```
@@ -480,8 +478,8 @@ public static class MyValidatorExtensions
         string domain)
     {
         return validator.Custom(
-          email => email.Contains($"@{domain}"),
-         $"Must be from {domain} domain"
+   email => email.Contains($"@{domain}"),
+        $"Must be from {domain} domain"
    );
     }
 }
@@ -497,24 +495,24 @@ public class CustomNotifier : IValidationNotifierSubscriber
 {
     public void Notify(List<ValidationResult> results)
     {
-  foreach (var result in results.Where(r => !r.IsValid))
-     {
-            // Your custom notification logic
-      LogError(result);
+        foreach (var result in results.Where(r => !r.IsValid))
+        {
+ // Your custom notification logic
+            LogError(result);
             SendEmail(result);
-            UpdateUI(result);
- }
+    UpdateUI(result);
+   }
     }
 }
 ```
 
-## ?? Requirements
+## 📋 Requirements
 
 - .NET 8.0 or higher
 - .NET 9.0 supported
 - C# 13.0 (for latest features)
 
-## ?? Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Please follow these guidelines:
 
@@ -524,40 +522,38 @@ Contributions are welcome! Please follow these guidelines:
 4. Ensure all tests pass
 5. Submit a pull request
 
-## ?? License
+## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## ?? Acknowledgments
+## 🙏 Acknowledgments
 
 - Inspired by FluentValidation
 - Built with modern .NET practices
 - Designed for real-world applications
 
-## ?? Support
+## 📞 Support
 
-- **Documentation**: See [DOCUMENTATION.md](ValidationFramework/DOCUMENTATION.md)
-- **Quick Start**: See [QUICKSTART.md](ValidationFramework/Fluent/QUICKSTART.md)
-- **Migration**: See [MIGRATION_GUIDE.md](ValidationFramework/Fluent/MIGRATION_GUIDE.md)
+- **Documentation**: See [DOCUMENTATION.md](DOCUMENTATION.md)
 - **Examples**: Check demo applications in solution
 
-## ??? Roadmap
+## 🗺️ Roadmap
 
 ### Version 2.0.0 (Current)
-- ? Fluent Validation API
-- ? Composite Validators
-- ? Async Validation Support
-- ? 20+ Extension Methods
-- ? Complete Documentation
+- ✅ Fluent Validation API
+- ✅ Composite Validators
+- ✅ Async Validation Support
+- ✅ 20+ Extension Methods
+- ✅ Complete Documentation
 
 ### Future Plans
-- ?? More built-in validators (DateTime, GUID, etc.)
-- ?? Localization support for error messages
-- ?? Integration with popular DI containers
-- ?? Performance optimizations
-- ?? More UI framework notifiers
+- 🔜 More built-in validators (DateTime, GUID, etc.)
+- 🔜 Localization support for error messages
+- 🔜 Integration with popular DI containers
+- 🔜 Performance optimizations
+- 🔜 More UI framework notifiers
 
-## ?? Version History
+## 📊 Version History
 
 ### 2.0.0 - Fluent API Release
 - Added complete Fluent Validation API
@@ -576,6 +572,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Made with ?? for the .NET Community**
+**Made with ❤️ for the .NET Community**
 
-**Happy Validating! ??**
+**Happy Validating! 🎉**
