@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="ValidationFramework.Demo.WinUI.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ValidationFramework.Demo.WinUI"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="ValidationFramework Demo - WinUI">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <!-- Scroll -->
+    <ScrollViewer
+        VerticalScrollBarVisibility="Auto"
+        HorizontalScrollBarVisibility="Disabled">
+
+        <Grid Padding="20" RowSpacing="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Title -->
+            <TextBlock
+                Grid.Row="0"
+                Text="ValidationFramework WinUI Demo"
+                FontSize="28"
+                FontWeight="Bold"
+                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,10" />
+
+            <!-- Main Content -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- User Registration -->
+                <Border
+                    Grid.Column="0"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8"
+                    Padding="20"
+                    Margin="0,0,10,0">
+
+                    <StackPanel Spacing="16">
+                        <TextBlock
+                            Text="User Registration"
+                            FontSize="18"
+                            FontWeight="SemiBold" />
+
+                        <!-- Username -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Username" />
+                            <TextBox x:Name="txtUsername" PlaceholderText="Enter username" />
+                            <TextBlock
+                                x:Name="lblUsernameError"
+                                Foreground="Red"
+                                FontSize="12"
+                                TextWrapping="Wrap"
+                                Visibility="Collapsed" />
+                        </StackPanel>
+
+                        <!-- Email -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Email" />
+                            <TextBox x:Name="txtEmail" PlaceholderText="Enter email" />
+                            <TextBlock
+                                x:Name="lblEmailError"
+                                Foreground="Red"
+                                FontSize="12"
+                                TextWrapping="Wrap"
+                                Visibility="Collapsed" />
+                        </StackPanel>
+
+                        <!-- Phone -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Phone" />
+                            <TextBox x:Name="txtPhone" PlaceholderText="Enter phone number" />
+                            <TextBlock
+                                x:Name="lblPhoneError"
+                                Foreground="Red"
+                                FontSize="12"
+                                TextWrapping="Wrap"
+                                Visibility="Collapsed" />
+                        </StackPanel>
+
+                        <!-- Password -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Password" />
+                            <PasswordBox
+                                x:Name="txtPassword"
+                                PlaceholderText="Enter password" />
+                            <TextBlock
+                                x:Name="lblPasswordError"
+                                Foreground="Red"
+                                FontSize="12"
+                                TextWrapping="Wrap"
+                                Visibility="Collapsed" />
+                        </StackPanel>
+
+                        <!-- Confirm Password -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Confirm Password" />
+                            <PasswordBox
+                                x:Name="txtConfirmPassword"
+                                PlaceholderText="Confirm password" />
+                            <TextBlock
+                                x:Name="lblConfirmPasswordError"
+                                Foreground="Red"
+                                FontSize="12"
+                                TextWrapping="Wrap"
+                                Visibility="Collapsed" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Notifier Options -->
+                <Border
+                    Grid.Column="1"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8"
+                    Padding="20"
+                    VerticalAlignment="Top">
+
+                    <StackPanel Spacing="12">
+                        <TextBlock
+                            Text="Notifier Options"
+                            FontSize="18"
+                            FontWeight="SemiBold" />
+
+                        <CheckBox
+                            x:Name="chkContentDialog"
+                            Content="ContentDialog Notifier" />
+
+                        <CheckBox
+                            x:Name="chkHighlight"
+                            Content="Highlight TextBoxes"
+                            IsChecked="True" />
+
+                        <CheckBox
+                            x:Name="chkInfoBar"
+                            Content="InfoBar Notifier"
+                            IsChecked="True" />
+
+                        <CheckBox
+                            x:Name="chkSummaryText"
+                            Content="Summary TextBlock"
+                            IsChecked="True" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Buttons -->
+            <StackPanel
+                Grid.Row="2"
+                Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                Spacing="16"
+                Margin="0,10,0,0">
+
+                <Button
+                    x:Name="btnValidate"
+                    Content="Validate"
+                    Width="120"
+                    Style="{StaticResource AccentButtonStyle}"
+                    Click="BtnValidate_Click" />
+
+                <Button
+                    x:Name="btnClear"
+                    Content="Clear"
+                    Width="120"
+                    Click="BtnClear_Click" />
+            </StackPanel>
+
+            <!-- InfoBar -->
+            <InfoBar
+                x:Name="infoBar"
+                Grid.Row="3"
+                IsOpen="False"
+                IsClosable="True"
+                Margin="0,10,0,0" />
+
+            <!-- Summary -->
+            <Border
+                Grid.Row="4"
+                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                CornerRadius="8"
+                Padding="16"
+                Margin="0,10,0,20"
+                MinHeight="100"
+                MaxHeight="200">
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <TextBlock
+                        x:Name="lblSummary"
+                        Text="Enter data and click Validate to check..."
+                        TextWrapping="Wrap" />
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</Window>

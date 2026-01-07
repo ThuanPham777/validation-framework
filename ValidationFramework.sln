@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValidationFramework.Demo", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValidationFramework.Demo.Winforms", "ValidationFramework.Demo.Winforms\ValidationFramework.Demo.Winforms.csproj", "{3E9414C1-651D-48B0-845D-EBC845C46B30}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValidationFramework.Demo.WinUI", "ValidationFramework.Demo.WinUI\ValidationFramework.Demo.WinUI.csproj", "{DC5DF6AC-17B5-4A52-9B21-569B6D25B9A2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,12 @@ Global
 		{3E9414C1-651D-48B0-845D-EBC845C46B30}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E9414C1-651D-48B0-845D-EBC845C46B30}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E9414C1-651D-48B0-845D-EBC845C46B30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC5DF6AC-17B5-4A52-9B21-569B6D25B9A2}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{DC5DF6AC-17B5-4A52-9B21-569B6D25B9A2}.Debug|Any CPU.Build.0 = Debug|x64
+		{DC5DF6AC-17B5-4A52-9B21-569B6D25B9A2}.Debug|Any CPU.Deploy.0 = Debug|x64
+		{DC5DF6AC-17B5-4A52-9B21-569B6D25B9A2}.Release|Any CPU.ActiveCfg = Release|x64
+		{DC5DF6AC-17B5-4A52-9B21-569B6D25B9A2}.Release|Any CPU.Build.0 = Release|x64
+		{DC5DF6AC-17B5-4A52-9B21-569B6D25B9A2}.Release|Any CPU.Deploy.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
