@@ -12,4 +12,8 @@
   <ProjectReference Include="..\ValidationFramework\ValidationFramework.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Validators\" />
+  </ItemGroup>
+
 </Project>

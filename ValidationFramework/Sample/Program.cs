@@ -1,17 +1,15 @@
-using ValidationFramework.Attributes;
+using System;
 using ValidationFramework.Core;
+using ValidationFramework.Fluent;
+using ValidationFramework.Result;
 using ValidationFramework.Notification;
 
 namespace ValidationFramework.Sample
 {
     public class User
     {
-        [Required(ErrorMessage = "Username is required")] 
-        [Length(3, 10, ErrorMessage = "Username must be 3-10 chars")] 
-        public string Username { get; set; }
-
-        [Email(ErrorMessage = "Email is invalid")] 
-        public string Email { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
     }
 
     public static class Program
@@ -21,12 +19,17 @@ namespace ValidationFramework.Sample
             var user = new User { Username = "", Email = "not-an-email" };
             var engine = new ValidationEngine();
 
-            // Register notifiers via engine's publisher
-            engine.Publisher.Subscribe(ValidationEventType.Invalid, new MessageBoxNotifier());
+            // Register a fluent validator via builder
+            engine.AddFluentValidator<User>(b =>
+            {
+                b.For(u => u.Username).Required().Length(3,10).WithMessage("Username must be3-10 chars");
+                b.For(u => u.Email).Required().Email().WithMessage("Email is invalid");
+            });
+
             engine.Publisher.Subscribe(ValidationEventType.Invalid, new SummaryNotifier());
 
-            // Validate (auto-notify inside)
             var results = engine.Validate(user);
+            Console.WriteLine($"Errors: {results.Count}");
         }
     }
 }

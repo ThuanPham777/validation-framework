@@ -5,13 +5,10 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using ValidationFramework.Core;
-using ValidationFramework.Group;
 using ValidationFramework.Notification;
 using ValidationFramework.Result;
-using ValidationFramework.Validator;
 using ValidationFramework.Demo.WinUI.Models;
 using ValidationFramework.Demo.WinUI.Notifiers;
-using ValidationFramework.Demo.WinUI.Validators;
 
 namespace ValidationFramework.Demo.WinUI
 {
@@ -57,44 +54,48 @@ namespace ValidationFramework.Demo.WinUI
         {
             _engine = new ValidationEngine();
 
-            // Username: must not contain special characters
-            var usernameGroup = new ValidatorGroup();
-            usernameGroup.Add(new NoSpecialCharValidator());
-            _engine.AddValidator(nameof(UserModel.Username), usernameGroup);
-
-            // Password: must be strong
-            var passwordGroup = new ValidatorGroup();
-            passwordGroup.Add(new StrongPasswordValidator());
-            _engine.AddValidator(nameof(UserModel.Password), passwordGroup);
-
-            // ConfirmPassword: must match Password
-            _engine.AddValidator(nameof(UserModel.ConfirmPassword), new DelegateValidator((value, propertyName) =>
+            _engine.AddFluentValidator<UserModel>(b =>
             {
-                if (value is not string confirmPassword)
-                    return ValidationResult.Fail(propertyName, "Confirm Password must be a string.", value, "PASSWORD_MATCH_TYPE");
+                // Username: must not contain special characters
+                b.For(u => u.Username)
+                    .Required()
+                    .Must(s => !string.IsNullOrWhiteSpace(s) && !System.Text.RegularExpressions.Regex.IsMatch(s!, "[^a-zA-Z0-9]"), "Username must not contain special characters", "NO_SPECIAL_CHAR");
 
-                if (!string.Equals(txtPassword.Password, confirmPassword, StringComparison.Ordinal))
-                    return ValidationResult.Fail(propertyName, "Password and Confirm Password do not match.", value, "PASSWORD_MATCH");
+                // Password: must be strong
+                b.For(u => u.Password)
+                    .Required()
+                    .Must(s => s is string ss && System.Text.RegularExpressions.Regex.IsMatch(ss, "[A-Z]"), "Password must contain at least one uppercase letter", "STRONG_PASSWORD_UPPER")
+                    .Must(s => s is string ss && System.Text.RegularExpressions.Regex.IsMatch(ss, "[a-z]"), "Password must contain at least one lowercase letter", "STRONG_PASSWORD_LOWER")
+                    .Must(s => s is string ss && System.Text.RegularExpressions.Regex.IsMatch(ss, "\\d"), "Password must contain at least one digit", "STRONG_PASSWORD_DIGIT");
 
-                return ValidationResult.Ok(propertyName);
-            }
-
-            // Email: extra rule for allowed domains
-            ));
-            _engine.AddValidator(nameof(UserModel.Email), new DelegateValidator((value, propertyName) =>
-            {
-                if (value is string email && !string.IsNullOrWhiteSpace(email))
+                // ConfirmPassword: must match Password
+                b.For(u => u.ConfirmPassword).Custom((value, propertyName) =>
                 {
-                    if (!email.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase) &&
-                        !email.EndsWith("@outlook.com", StringComparison.OrdinalIgnoreCase) &&
-                        !email.EndsWith("@yahoo.com", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return ValidationResult.Fail(propertyName, "Email must be from @gmail.com, @outlook.com, or @yahoo.com", value, "EMAIL_DOMAIN");
-                    }
-                }
+                    if (value is not string confirm)
+                        return ValidationResult.Fail(propertyName, "Confirm Password must be a string.", value, "PASSWORD_MATCH_TYPE");
 
-                return ValidationResult.Ok(propertyName);
-            }));
+                    if (!string.Equals(txtPassword.Password, confirm, StringComparison.Ordinal))
+                        return ValidationResult.Fail(propertyName, "Password and Confirm Password do not match.", value, "PASSWORD_MATCH");
+
+                    return ValidationResult.Ok(propertyName);
+                });
+
+                // Email: extra rule for allowed domains
+                b.For(u => u.Email).Custom((value, propertyName) =>
+                {
+                    if (value is string email && !string.IsNullOrWhiteSpace(email))
+                    {
+                        if (!email.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase) &&
+                            !email.EndsWith("@outlook.com", StringComparison.OrdinalIgnoreCase) &&
+                            !email.EndsWith("@yahoo.com", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return ValidationResult.Fail(propertyName, "Email must be from @gmail.com, @outlook.com, or @yahoo.com", value, "EMAIL_DOMAIN");
+                        }
+                    }
+
+                    return ValidationResult.Ok(propertyName);
+                });
+            });
         }
 
         private void SubscribeNotifiers()

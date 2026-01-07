@@ -1,11 +1,10 @@
+using System.Text.RegularExpressions;
 using ValidationFramework.Core;
 using ValidationFramework.Notification;
-using ValidationFramework.Group;
-using ValidationFramework.Validator;
 using ValidationFramework.Result;
+using ValidationFramework.Fluent;
 using ValidationFramework.Demo.Winforms.Models;
 using ValidationFramework.Demo.Winforms.Notifiers;
-using ValidationFramework.Demo.Winforms.Validators;
 
 namespace ValidationFramework.Demo.Winforms
 {
@@ -19,15 +18,13 @@ namespace ValidationFramework.Demo.Winforms
         public UserRegistrationForm()
         {
             InitializeComponent();
-            InitializeValidation();
+            InitializeMaps();
             WireUpEvents();
         }
 
-        // Initialize the validation engine with validators and notifiers
-        private void InitializeValidation()
+        // Initialize mappings only
+        private void InitializeMaps()
         {
-            _engine = new ValidationEngine();
-
             // Map TextBoxes to property names
             _textBoxes = new Dictionary<string, TextBox>
             {
@@ -57,44 +54,6 @@ namespace ValidationFramework.Demo.Winforms
                 { nameof(UserModel.Password), lblPasswordError },
                 { nameof(UserModel.ConfirmPassword), lblConfirmPasswordError }
             };
-
-            // Add custom validators using ValidatorGroup
-            // Username: must not contain special characters
-            var usernameGroup = new ValidatorGroup();
-            usernameGroup.Add(new NoSpecialCharValidator());
-            _engine.AddValidator(nameof(UserModel.Username), usernameGroup);
-
-            // Password: must be strong (uppercase, lowercase, digit)
-            var passwordGroup = new ValidatorGroup();
-            passwordGroup.Add(new StrongPasswordValidator());
-            _engine.AddValidator(nameof(UserModel.Password), passwordGroup);
-
-            // ConfirmPassword: must match Password using DelegateValidator
-            _engine.AddValidator(nameof(UserModel.ConfirmPassword), new DelegateValidator((value, propertyName) =>
-            {
-                if (value is not string confirmPassword)
-                    return ValidationResult.Fail(propertyName, "Confirm Password must be a string.", value, "PASSWORD_MATCH_TYPE");
-
-                if (txtPassword.Text != confirmPassword)
-                    return ValidationResult.Fail(propertyName, "Password and Confirm Password do not match.", value, "PASSWORD_MATCH");
-
-                return ValidationResult.Ok(propertyName);
-            }));
-
-            // Email: must be @gmail.com using DelegateValidator (example custom rule)
-            _engine.AddValidator(nameof(UserModel.Email), new DelegateValidator((value, propertyName) =>
-            {
-                if (value is string email && !string.IsNullOrWhiteSpace(email))
-                {
-                    if (!email.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase) &&
-                        !email.EndsWith("@outlook.com", StringComparison.OrdinalIgnoreCase) &&
-                        !email.EndsWith("@yahoo.com", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return ValidationResult.Fail(propertyName, "Email must be from @gmail.com, @outlook.com, or @yahoo.com", value, "EMAIL_DOMAIN");
-                    }
-                }
-                return ValidationResult.Ok(propertyName);
-            }));
         }
 
         // Wire up button click events
@@ -107,42 +66,51 @@ namespace ValidationFramework.Demo.Winforms
         // Handle Validate button click
         private void BtnValidate_Click(object? sender, EventArgs e)
         {
-            // Create a fresh engine for each validation to re-subscribe notifiers
+            // Create a fresh engine for each validation
             _engine = new ValidationEngine();
 
-            // Re-add custom validators
-            var usernameGroup = new ValidatorGroup();
-            usernameGroup.Add(new NoSpecialCharValidator());
-            _engine.AddValidator(nameof(UserModel.Username), usernameGroup);
-
-            var passwordGroup = new ValidatorGroup();
-            passwordGroup.Add(new StrongPasswordValidator());
-            _engine.AddValidator(nameof(UserModel.Password), passwordGroup);
-
-            _engine.AddValidator(nameof(UserModel.ConfirmPassword), new DelegateValidator((value, propertyName) =>
+            // Register fluent validators for UserModel
+            _engine.AddFluentValidator<UserModel>(b =>
             {
-                if (value is not string confirmPassword)
-                    return ValidationResult.Fail(propertyName, "Confirm Password must be a string.", value, "PASSWORD_MATCH_TYPE");
+                // Username: required + no special characters
+                b.For(u => u.Username)
+                    .Required()
+                    .Must(s => !string.IsNullOrEmpty(s) && !Regex.IsMatch(s!, "[^a-zA-Z0-9]"), "Username must not contain special characters", "NO_SPECIAL_CHAR");
 
-                if (txtPassword.Text != confirmPassword)
-                    return ValidationResult.Fail(propertyName, "Password and Confirm Password do not match.", value, "PASSWORD_MATCH");
+                // Password: must be strong
+                b.For(u => u.Password)
+                    .Required()
+                    .Must(s => s is string ss && Regex.IsMatch(ss, "[A-Z]"), "Password must contain at least one uppercase letter", "STRONG_PASSWORD_UPPER")
+                    .Must(s => s is string ss && Regex.IsMatch(ss, "[a-z]"), "Password must contain at least one lowercase letter", "STRONG_PASSWORD_LOWER")
+                    .Must(s => s is string ss && Regex.IsMatch(ss, "\\d"), "Password must contain at least one digit", "STRONG_PASSWORD_DIGIT");
 
-                return ValidationResult.Ok(propertyName);
-            }));
-
-            _engine.AddValidator(nameof(UserModel.Email), new DelegateValidator((value, propertyName) =>
-            {
-                if (value is string email && !string.IsNullOrWhiteSpace(email))
+                // ConfirmPassword: must match Password
+                b.For(u => u.ConfirmPassword).Custom((value, propertyName) =>
                 {
-                    if (!email.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase) &&
-                        !email.EndsWith("@outlook.com", StringComparison.OrdinalIgnoreCase) &&
-                        !email.EndsWith("@yahoo.com", StringComparison.OrdinalIgnoreCase))
+                    if (value is not string confirm)
+                        return ValidationResult.Fail(propertyName, "Confirm Password must be a string.", value, "PASSWORD_MATCH_TYPE");
+
+                    if (txtPassword.Text != confirm)
+                        return ValidationResult.Fail(propertyName, "Password and Confirm Password do not match.", value, "PASSWORD_MATCH");
+
+                    return ValidationResult.Ok(propertyName);
+                });
+
+                // Email: allowed domains
+                b.For(u => u.Email).Custom((value, propertyName) =>
+                {
+                    if (value is string email && !string.IsNullOrWhiteSpace(email))
                     {
-                        return ValidationResult.Fail(propertyName, "Email must be from @gmail.com, @outlook.com, or @yahoo.com", value, "EMAIL_DOMAIN");
+                        if (!email.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase) &&
+                            !email.EndsWith("@outlook.com", StringComparison.OrdinalIgnoreCase) &&
+                            !email.EndsWith("@yahoo.com", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return ValidationResult.Fail(propertyName, "Email must be from @gmail.com, @outlook.com, or @yahoo.com", value, "EMAIL_DOMAIN");
+                        }
                     }
-                }
-                return ValidationResult.Ok(propertyName);
-            }));
+                    return ValidationResult.Ok(propertyName);
+                });
+            });
 
             // Subscribe notifiers based on checkbox selections
             if (chkMessageBox.Checked)
