@@ -1,53 +1,8 @@
 ﻿using System;
-using ValidationFramework.Attributes;
-using ValidationFramework.Core;
-using ValidationFramework.Result;
-using ValidationFramework.Group;
-using ValidationFramework.Validator;
-using ValidationFramework.Notification;
+using ValidationFramework.Demo.Demos;
 
 namespace ValidationFramework.Demo
 {
-    // Model with attribute validation
-    public class User
-    {
-        [Required(ErrorMessage = "Username is required")]
-        [Length(3, 10, ErrorMessage = "Username must be 3-10 chars")]
-        public string Username { get; set; }
-
-        [Email(ErrorMessage = "Email is invalid")]
-        public string Email { get; set; }
-    }
-
-    // Username does not contain digits
-    public class NoDigitValidator : IValidator
-    {
-        public ValidationResult Validate(object value, string propertyName)
-        {
-            if (value is string s && System.Text.RegularExpressions.Regex.IsMatch(s, "\\d"))
-                return ValidationResult.Fail(propertyName, $"{propertyName} must not contain digits.");
-            return ValidationResult.Ok(propertyName);
-        }
-    }
-
-    // Custom notifier in console with red color
-    public class RedConsoleNotifier : IValidationNotifierSubscriber
-    {
-        public void Notify(List<ValidationResult> results)
-        {
-            foreach (var result in results)
-            {
-                if (!result.IsValid)
-                {
-                    var old = Console.ForegroundColor;
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"[RedNotifier] {result.PropertyName}: {result.Message}");
-                    Console.ForegroundColor = old;
-                }
-            }
-        }
-    }
-
     class Program
     {
         static void Main()
@@ -55,47 +10,129 @@ namespace ValidationFramework.Demo
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.InputEncoding = System.Text.Encoding.UTF8;
 
-            var user = new User { Username = "ab1", Email = "not-an-email" };
-            var engine = new ValidationEngine();
+            DemoHelpers.PrintHeader("ValidationFramework - Interactive Demo");
+            Console.WriteLine("Welcome to ValidationFramework Interactive Demo!");
+            Console.WriteLine("Each demo will guide you through data entry and validation.\n");
 
-            //4. Add custom validator and group validator for Username
-            var group = new ValidatorGroup();
-            group.Add(new NoDigitValidator());
-            group.Add(new AlphaOnlyValidator());
-            group.Add(new NoSpecialCharValidator());
-            group.Add(new LengthValidator(5,8)); // override length
+            bool continueDemo = true;
 
-            // Add a purely code-based rule with DelegateValidator (example: username must start with a letter)
-            group.Add(new DelegateValidator((value, propertyName) =>
+            while (continueDemo)
             {
-                if (value is string s && s.Length >0 && char.IsLetter(s[0]))
-                    return ValidationResult.Ok(propertyName);
-                return ValidationResult.Fail(propertyName, $"{propertyName} must start with a letter.", value, "START_WITH_LETTER");
-            }));
+                ShowMenu();
+                var choice = Console.ReadLine();
 
-            engine.AddValidator(nameof(User.Username), group);
+                Console.Clear();
 
-            // Add code-based rules for Email using DelegateValidator
-            engine.AddValidator(nameof(User.Email), new DelegateValidator((value, propertyName) =>
-            {
-                if (value is string s && s.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase))
-                    return ValidationResult.Ok(propertyName);
-                return ValidationResult.Fail(propertyName, $"{propertyName} must be a @gmail.com address.", value, "EMAIL_DOMAIN");
-            }));
+                switch (choice)
+                {
+                    case "1":
+                        Demo1_AttributeBased.Run();
+                        break;
+                    case "2":
+                        Demo2_FluentValidation.Run();
+                        break;
+                    case "3":
+                        Demo3_HybridApproach.Run();
+                        break;
+                    case "4":
+                        Demo4_CustomValidators.Run();
+                        break;
+                    case "5":
+                        Demo5_ValidatorGroups.Run();
+                        break;
+                    case "6":
+                        Demo6_DelegateValidators.Run();
+                        break;
+                    case "7":
+                        Demo7_ExtensionMethods.Run();
+                        break;
+                    case "8":
+                        RunAllDemos();
+                        break;
+                    case "0":
+                        continueDemo = false;
+                        break;
+                    default:
+                        Console.WriteLine("Invalid choice! Press any key to continue...");
+                        Console.ReadKey();
+                        Console.Clear();
+                        break;
+                }
 
-            // Register notifiers via engine's publisher
-            engine.Publisher.Subscribe(ValidationEventType.Invalid, new MessageBoxNotifier());
-            engine.Publisher.Subscribe(ValidationEventType.Invalid, new SummaryNotifier());
-            engine.Publisher.Subscribe(ValidationEventType.Invalid, new RedConsoleNotifier());
+                if (continueDemo && choice != "0")
+                {
+                    Console.WriteLine("\n" + new string('=', 70));
+                    Console.Write("Press any key to return to menu...");
+                    Console.ReadKey();
+                    Console.Clear();
+                }
+            }
 
-            // Validate (auto-notify inside)
-            var results = engine.Validate(user);
+            DemoHelpers.PrintHeader("Thank You!");
+            Console.WriteLine("Thank you for trying ValidationFramework!");
+            Console.WriteLine("\nPress any key to exit...");
+            Console.ReadKey();
+        }
 
-            // Simple to apply: just use attribute or add validator
-            Console.WriteLine("\n==> Change Username to 'abc' and Email to valid to see pass");
-            user.Username = "abc";
-            user.Email = "abc@gmail.com";
-            results = engine.Validate(user);
+        static void ShowMenu()
+        {
+            Console.WriteLine(new string('=', 70));
+            Console.WriteLine("  DEMO MENU");
+            Console.WriteLine(new string('=', 70));
+            Console.WriteLine();
+            Console.WriteLine("  1. Attribute-Based Validation");
+            Console.WriteLine("  2. Fluent Validation API");
+            Console.WriteLine("  3. Hybrid Approach (Attributes + Fluent)");
+            Console.WriteLine("  4. Custom Validators");
+            Console.WriteLine("  5. Validator Groups");
+            Console.WriteLine("  6. Delegate Validators");
+            Console.WriteLine("  7. Extension Methods");
+            Console.WriteLine();
+            Console.WriteLine("  8. Run All Demos (Sequential)");
+            Console.WriteLine("  0. Exit");
+            Console.WriteLine();
+            Console.WriteLine(new string('=', 70));
+            Console.Write("\nEnter your choice (0-8): ");
+        }
+
+        static void RunAllDemos()
+        {
+            DemoHelpers.PrintHeader("Running All Demos");
+            Console.WriteLine("Running all demos sequentially...\n");
+            Console.WriteLine("Press any key to start...");
+            Console.ReadKey();
+            Console.Clear();
+
+            Demo1_AttributeBased.Run();
+            PauseBetweenDemos();
+
+            Demo2_FluentValidation.Run();
+            PauseBetweenDemos();
+
+            Demo3_HybridApproach.Run();
+            PauseBetweenDemos();
+
+            Demo4_CustomValidators.Run();
+            PauseBetweenDemos();
+
+            Demo5_ValidatorGroups.Run();
+            PauseBetweenDemos();
+
+            Demo6_DelegateValidators.Run();
+            PauseBetweenDemos();
+
+            Demo7_ExtensionMethods.Run();
+
+            Console.WriteLine("\n" + new string('=', 70));
+            Console.WriteLine("All demos completed!");
+        }
+
+        static void PauseBetweenDemos()
+        {
+            Console.WriteLine("\n" + new string('-', 70));
+            Console.Write("Press any key to continue to next demo...");
+            Console.ReadKey();
+            Console.Clear();
         }
     }
 }
