@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ValidationFramework.Demo.WinUI (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ValidationFramework.Demo.WinUI (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
