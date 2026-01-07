@@ -1,4 +1,3 @@
-using System;
 using ValidationFramework.Attributes;
 using ValidationFramework.Core;
 using ValidationFramework.Notification;
@@ -21,12 +20,13 @@ namespace ValidationFramework.Sample
         {
             var user = new User { Username = "", Email = "not-an-email" };
             var engine = new ValidationEngine();
-            var results = engine.Validate(user);
 
-            var publisher = new NotificationPublisher();
-            publisher.Subscribe(ValidationEventType.Invalid, new MessageBoxNotifier());
-            publisher.Subscribe(ValidationEventType.Invalid, new SummaryNotifier());
-            publisher.Notify(ValidationEventType.Invalid, results);
+            // Register notifiers via engine's publisher
+            engine.Publisher.Subscribe(ValidationEventType.Invalid, new MessageBoxNotifier());
+            engine.Publisher.Subscribe(ValidationEventType.Invalid, new SummaryNotifier());
+
+            // Validate (auto-notify inside)
+            var results = engine.Validate(user);
         }
     }
 }

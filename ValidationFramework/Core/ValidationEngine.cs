@@ -1,11 +1,10 @@
-using System;
-using System.Collections.Generic;
 using System.Reflection;
 using ValidationFramework.Attributes;
 using ValidationFramework.Factory;
 using ValidationFramework.Group;
 using ValidationFramework.Result;
 using ValidationFramework.Validator;
+using ValidationFramework.Notification;
 
 namespace ValidationFramework.Core
 {
@@ -13,6 +12,9 @@ namespace ValidationFramework.Core
     {
         private readonly ValidatorFactory _factory = new();
         private readonly Dictionary<string, ValidatorGroup> _validators = new();
+        private readonly NotificationPublisher _publisher = new();
+
+        public NotificationPublisher Publisher => _publisher;
 
         public void AddValidator(string property, IValidator validator)
         {
@@ -43,6 +45,13 @@ namespace ValidationFramework.Core
                         results.Add(result);
                 }
             }
+
+            // Auto-notify after validation
+            if (results.Count > 0)
+                _publisher.Notify(ValidationEventType.Invalid, results);
+            else
+                _publisher.Notify(ValidationEventType.Validated, results);
+
             return results;
         }
     }

@@ -5,8 +5,6 @@ using ValidationFramework.Result;
 using ValidationFramework.Group;
 using ValidationFramework.Validator;
 using ValidationFramework.Notification;
-using System.Collections.Generic;
-using ValidationFramework.Demo;
 
 namespace ValidationFramework.Demo
 {
@@ -54,6 +52,9 @@ namespace ValidationFramework.Demo
     {
         static void Main()
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.InputEncoding = System.Text.Encoding.UTF8;
+
             var user = new User { Username = "ab1", Email = "not-an-email" };
             var engine = new ValidationEngine();
 
@@ -62,12 +63,12 @@ namespace ValidationFramework.Demo
             group.Add(new NoDigitValidator());
             group.Add(new AlphaOnlyValidator());
             group.Add(new NoSpecialCharValidator());
-            group.Add(new LengthValidator(5, 8)); // override length
+            group.Add(new LengthValidator(5,8)); // override length
 
             // Add a purely code-based rule with DelegateValidator (example: username must start with a letter)
             group.Add(new DelegateValidator((value, propertyName) =>
             {
-                if (value is string s && s.Length > 0 && char.IsLetter(s[0]))
+                if (value is string s && s.Length >0 && char.IsLetter(s[0]))
                     return ValidationResult.Ok(propertyName);
                 return ValidationResult.Fail(propertyName, $"{propertyName} must start with a letter.", value, "START_WITH_LETTER");
             }));
@@ -82,22 +83,19 @@ namespace ValidationFramework.Demo
                 return ValidationResult.Fail(propertyName, $"{propertyName} must be a @gmail.com address.", value, "EMAIL_DOMAIN");
             }));
 
-            // Validate
-            var results = engine.Validate(user);
+            // Register notifiers via engine's publisher
+            engine.Publisher.Subscribe(ValidationEventType.Invalid, new MessageBoxNotifier());
+            engine.Publisher.Subscribe(ValidationEventType.Invalid, new SummaryNotifier());
+            engine.Publisher.Subscribe(ValidationEventType.Invalid, new RedConsoleNotifier());
 
-            // Register notifiers
-            var publisher = new NotificationPublisher();
-            publisher.Subscribe(ValidationEventType.Invalid, new MessageBoxNotifier());
-            publisher.Subscribe(ValidationEventType.Invalid, new SummaryNotifier());
-            publisher.Subscribe(ValidationEventType.Invalid, new RedConsoleNotifier());
-            publisher.Notify(ValidationEventType.Invalid, results);
+            // Validate (auto-notify inside)
+            var results = engine.Validate(user);
 
             // Simple to apply: just use attribute or add validator
             Console.WriteLine("\n==> Change Username to 'abc' and Email to valid to see pass");
             user.Username = "abc";
             user.Email = "abc@gmail.com";
             results = engine.Validate(user);
-            publisher.Notify(ValidationEventType.Invalid, results);
         }
     }
 }

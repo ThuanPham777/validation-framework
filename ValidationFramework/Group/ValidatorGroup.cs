@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using ValidationFramework.Result;
 using ValidationFramework.Validator;
 
