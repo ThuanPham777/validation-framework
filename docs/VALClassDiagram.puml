@@ -1,0 +1,172 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+' =========================
+' Core
+' =========================
+class ValidationResult {
+  +bool IsValid
+  +string Message
+  +string PropertyName
+  +object? AttemptedValue
+  +string? ErrorCode
+  +static ValidationResult Ok(string propertyName)
+  +static ValidationResult Fail(string propertyName, string message, object? value=null, string? errorCode=null)
+}
+
+class ValidationContext {
+  +object Model
+  +string PropertyName
+  +object? Value
+  +Type ModelType
+  +ValidationContext(model: object, propertyName: string, value: object?)
+}
+
+' =========================
+' Strategy Pattern
+' =========================
+interface IValidator {
+  +IEnumerable<ValidationResult> Validate(ctx: ValidationContext)
+}
+
+class RequiredValidator {
+  -message: string
+}
+class EmailValidator {
+  -message: string
+}
+class PhoneValidator {
+  -message: string
+}
+class RegexValidator {
+  -pattern: string
+  -message: string
+}
+class LengthValidator {
+  -min: int
+  -max: int
+  -message: string
+}
+
+IValidator <|.. RequiredValidator
+IValidator <|.. EmailValidator
+IValidator <|.. PhoneValidator
+IValidator <|.. RegexValidator
+IValidator <|.. LengthValidator
+
+class DelegateValidator {
+  -func: Func<ValidationContext, IEnumerable<ValidationResult>>
+  +DelegateValidator(func)
+  +IEnumerable<ValidationResult> Validate(ctx: ValidationContext)
+}
+IValidator <|.. DelegateValidator
+
+' =========================
+' Composite Pattern
+' =========================
+class ValidatorGroup {
+  -validators: List<IValidator>
+  +Add(validator: IValidator): ValidatorGroup
+  +IEnumerable<ValidationResult> Validate(ctx: ValidationContext)
+}
+
+IValidator <|.. ValidatorGroup
+ValidatorGroup o-- "many" IValidator
+
+' =========================
+' Attribute / Metadata (NO Factory method here)
+' =========================
+abstract class ValidationAttribute {
+  +string ErrorMessage
+}
+
+class RequiredAttribute
+class EmailAttribute
+class PhoneAttribute
+class RegexAttribute {
+  +string Pattern
+}
+class LengthAttribute {
+  +int Min
+  +int Max
+}
+class CustomValidationAttribute {
+  +Type ValidatorType
+}
+
+ValidationAttribute <|-- RequiredAttribute
+ValidationAttribute <|-- EmailAttribute
+ValidationAttribute <|-- PhoneAttribute
+ValidationAttribute <|-- RegexAttribute
+ValidationAttribute <|-- LengthAttribute
+ValidationAttribute <|-- CustomValidationAttribute
+
+' =========================
+' Reflection Scanner
+' =========================
+class AttributeScanner {
+  +Scan(modelType: Type): Dictionary<string, List<ValidationAttribute>>
+}
+AttributeScanner ..> ValidationAttribute
+
+' =========================
+' Factory Method (Dedicated Factory)
+' =========================
+class ValidatorFactory {
+  +Create(attr: ValidationAttribute): IValidator
+}
+ValidatorFactory ..> ValidationAttribute
+ValidatorFactory ..> IValidator
+
+' =========================
+' Observer Pattern (UI Notification)
+' =========================
+enum ValidationEventType {
+  Validated
+  Invalid
+}
+
+interface IValidationNotifierSubscriber {
+  +Notify(results: List<ValidationResult>): void
+}
+
+class MessageBoxNotifier
+class TooltipNotifier
+class LabelNotifier
+class SummaryNotifier
+
+IValidationNotifierSubscriber <|.. MessageBoxNotifier
+IValidationNotifierSubscriber <|.. TooltipNotifier
+IValidationNotifierSubscriber <|.. LabelNotifier
+IValidationNotifierSubscriber <|.. SummaryNotifier
+
+class NotificationPublisher {
+  -listeners: Dictionary<ValidationEventType, List<IValidationNotifierSubscriber>>
+  +Subscribe(eventType: ValidationEventType, listener: IValidationNotifierSubscriber): void
+  +Unsubscribe(eventType: ValidationEventType, listener: IValidationNotifierSubscriber): void
+  +Notify(eventType: ValidationEventType, results: List<ValidationResult>): void
+}
+
+NotificationPublisher o-- "many" IValidationNotifierSubscriber
+
+' =========================
+' Facade
+' =========================
+class ValidationEngine {
+  -factory: ValidatorFactory
+  -scanner: AttributeScanner
+  -validators: Dictionary<string, ValidatorGroup>
+  -publisher: NotificationPublisher
+
+  +AddValidator(property: string, validator: IValidator): void
+  +Validate(model: object): List<ValidationResult>
+}
+
+ValidationEngine o-- ValidatorFactory
+ValidationEngine o-- AttributeScanner
+ValidationEngine o-- NotificationPublisher
+ValidationEngine o-- ValidatorGroup
+ValidationEngine ..> ValidationResult
+ValidationEngine ..> IValidator
+
+@enduml

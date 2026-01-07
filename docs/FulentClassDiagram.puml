@@ -1,0 +1,121 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+' =========================
+' Fluent Core Abstractions
+' =========================
+interface IFluentValidator<TModel> {
+  +List<ValidationResult> Validate(model: TModel)
+  +IFluentValidator<TModel> RuleFor<TProp>(expr: Func<TModel, TProp>, propertyName: string)
+}
+
+abstract class AbstractValidator<TModel> {
+  -rules: List<PropertyValidator<TModel>>
+  +IFluentValidator<TModel> RuleFor<TProp>(expr: Func<TModel, TProp>, propertyName: string)
+  +List<ValidationResult> Validate(model: TModel)
+  #ValidationContext BuildContext(model: TModel, propertyName: string, value: object?): ValidationContext
+}
+
+IFluentValidator <|.. AbstractValidator
+
+' =========================
+' Fluent Rule Node (per property)
+' =========================
+class PropertyValidator<TModel> {
+  +string PropertyName
+  -getter: Func<TModel, object?>
+  -validatorChain: IValidator   ' usually a composite group
+  +PropertyValidator(propertyName: string, getter: Func<TModel, object?>)
+  +ValidatorBuilder<TModel> Configure(): ValidatorBuilder<TModel>
+  +IEnumerable<ValidationResult> Validate(model: TModel, root: TModel): IEnumerable<ValidationResult>
+}
+
+AbstractValidator o-- "many" PropertyValidator
+
+PropertyValidator ..> ValidationContext
+PropertyValidator ..> ValidationResult
+PropertyValidator ..> IValidator
+
+' =========================
+' Fluent Builder (chaining)
+' =========================
+class ValidatorBuilder<TModel> {
+  -owner: PropertyValidator<TModel>
+  -group: ValidatorGroup
+  +NotNull(message: string = null): ValidatorBuilder<TModel>
+  +NotEmpty(message: string = null): ValidatorBuilder<TModel>
+  +Email(message: string = null): ValidatorBuilder<TModel>
+  +Phone(message: string = null): ValidatorBuilder<TModel>
+  +Regex(pattern: string, message: string = null): ValidatorBuilder<TModel>
+  +Length(min: int, max: int, message: string = null): ValidatorBuilder<TModel>
+  +Must(func: Func<ValidationContext,bool>, message: string): ValidatorBuilder<TModel>
+  +WithErrorCode(code: string): ValidatorBuilder<TModel>
+  +When(predicate: Func<TModel,bool>): ValidatorBuilder<TModel>
+  +Unless(predicate: Func<TModel,bool>): ValidatorBuilder<TModel>
+}
+
+PropertyValidator o-- ValidatorBuilder
+ValidatorBuilder o-- ValidatorGroup
+ValidatorBuilder ..> IValidator
+ValidatorBuilder ..> DelegateValidator
+
+' =========================
+' Common Rules (preset shortcuts)
+' =========================
+class CommonRules {
+  +static ValidatorBuilder<TModel> Required<TModel>(b: ValidatorBuilder<TModel>, message: string=null)
+  +static ValidatorBuilder<TModel> ContactPhone<TModel>(b: ValidatorBuilder<TModel>, message: string=null)
+  +static ValidatorBuilder<TModel> ContactEmail<TModel>(b: ValidatorBuilder<TModel>, message: string=null)
+}
+
+CommonRules ..> ValidatorBuilder
+
+' =========================
+' Composite Validators (chain/group)
+' =========================
+class CompositeValidators {
+  +static ValidatorGroup All(params IValidator[] v)
+  +static ValidatorGroup Any(params IValidator[] v)
+  +static IValidator When(Func<ValidationContext,bool> cond, IValidator inner)
+  +static IValidator Unless(Func<ValidationContext,bool> cond, IValidator inner)
+}
+
+CompositeValidators ..> IValidator
+CompositeValidators ..> ValidatorGroup
+
+' =========================
+' Async Validators (optional layer)
+' =========================
+interface IAsyncValidator {
+  +Task<IEnumerable<ValidationResult>> ValidateAsync(ctx: ValidationContext)
+}
+
+class AsyncDelegateValidator {
+  -func: Func<ValidationContext, Task<IEnumerable<ValidationResult>>>
+  +AsyncDelegateValidator(func)
+  +Task<IEnumerable<ValidationResult>> ValidateAsync(ctx: ValidationContext)
+}
+
+IAsyncValidator <|.. AsyncDelegateValidator
+
+class AsyncValidators {
+  +static IAsyncValidator MustAsync(Func<ValidationContext, Task<bool>> predicate, message: string)
+  +static IAsyncValidator Wrap(IValidator syncValidator)
+}
+
+AsyncValidators ..> IAsyncValidator
+AsyncValidators ..> IValidator
+AsyncValidators ..> ValidationResult
+AsyncValidators ..> ValidationContext
+
+' =========================
+' Glue to your existing core (reuse)
+' =========================
+' These are already in your diagram, referenced here:
+class ValidationContext
+class ValidationResult
+interface IValidator
+class ValidatorGroup
+class DelegateValidator
+
+@enduml
