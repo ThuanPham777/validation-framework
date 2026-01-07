@@ -1,11 +1,12 @@
-using ValidationFramework.Core;
+﻿using ValidationFramework.Core;
 using ValidationFramework.Notification;
-using ValidationFramework.Group;
 using ValidationFramework.Validator;
 using ValidationFramework.Result;
 using ValidationFramework.Demo.Winforms.Models;
 using ValidationFramework.Demo.Winforms.Notifiers;
 using ValidationFramework.Demo.Winforms.Validators;
+using ValidationFramework.Extensions;
+using System.Linq;
 
 namespace ValidationFramework.Demo.Winforms
 {
@@ -15,6 +16,7 @@ namespace ValidationFramework.Demo.Winforms
         private Dictionary<string, TextBox> _textBoxes = null!;
         private Dictionary<string, Control> _controls = null!;
         private Dictionary<string, Label> _errorLabels = null!;
+        private UserModelValidator _userValidator = null!;
 
         public UserRegistrationForm()
         {
@@ -27,6 +29,7 @@ namespace ValidationFramework.Demo.Winforms
         private void InitializeValidation()
         {
             _engine = new ValidationEngine();
+            _userValidator = new UserModelValidator();
 
             // Map TextBoxes to property names
             _textBoxes = new Dictionary<string, TextBox>
@@ -58,41 +61,19 @@ namespace ValidationFramework.Demo.Winforms
                 { nameof(UserModel.ConfirmPassword), lblConfirmPasswordError }
             };
 
-            // Add custom validators using ValidatorGroup
-            // Username: must not contain special characters
-            var usernameGroup = new ValidatorGroup();
-            usernameGroup.Add(new NoSpecialCharValidator());
-            _engine.AddValidator(nameof(UserModel.Username), usernameGroup);
+            // Register fluent validator
+            _engine.AddFluentValidator(_userValidator);
 
-            // Password: must be strong (uppercase, lowercase, digit)
-            var passwordGroup = new ValidatorGroup();
-            passwordGroup.Add(new StrongPasswordValidator());
-            _engine.AddValidator(nameof(UserModel.Password), passwordGroup);
-
-            // ConfirmPassword: must match Password using DelegateValidator
+            // Add custom ConfirmPassword validator using DelegateValidator
+            // This checks password matching which is cross-field validation
             _engine.AddValidator(nameof(UserModel.ConfirmPassword), new DelegateValidator((value, propertyName) =>
             {
-                if (value is not string confirmPassword)
+                if (!(value is string confirmPassword))
                     return ValidationResult.Fail(propertyName, "Confirm Password must be a string.", value, "PASSWORD_MATCH_TYPE");
 
                 if (txtPassword.Text != confirmPassword)
                     return ValidationResult.Fail(propertyName, "Password and Confirm Password do not match.", value, "PASSWORD_MATCH");
 
-                return ValidationResult.Ok(propertyName);
-            }));
-
-            // Email: must be @gmail.com using DelegateValidator (example custom rule)
-            _engine.AddValidator(nameof(UserModel.Email), new DelegateValidator((value, propertyName) =>
-            {
-                if (value is string email && !string.IsNullOrWhiteSpace(email))
-                {
-                    if (!email.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase) &&
-                        !email.EndsWith("@outlook.com", StringComparison.OrdinalIgnoreCase) &&
-                        !email.EndsWith("@yahoo.com", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return ValidationResult.Fail(propertyName, "Email must be from @gmail.com, @outlook.com, or @yahoo.com", value, "EMAIL_DOMAIN");
-                    }
-                }
                 return ValidationResult.Ok(propertyName);
             }));
         }
@@ -109,38 +90,20 @@ namespace ValidationFramework.Demo.Winforms
         {
             // Create a fresh engine for each validation to re-subscribe notifiers
             _engine = new ValidationEngine();
+            _userValidator = new UserModelValidator();
 
-            // Re-add custom validators
-            var usernameGroup = new ValidatorGroup();
-            usernameGroup.Add(new NoSpecialCharValidator());
-            _engine.AddValidator(nameof(UserModel.Username), usernameGroup);
+            // Re-register fluent validator
+            _engine.AddFluentValidator(_userValidator);
 
-            var passwordGroup = new ValidatorGroup();
-            passwordGroup.Add(new StrongPasswordValidator());
-            _engine.AddValidator(nameof(UserModel.Password), passwordGroup);
-
+            // Re-add ConfirmPassword validator
             _engine.AddValidator(nameof(UserModel.ConfirmPassword), new DelegateValidator((value, propertyName) =>
             {
-                if (value is not string confirmPassword)
+                if (!(value is string confirmPassword))
                     return ValidationResult.Fail(propertyName, "Confirm Password must be a string.", value, "PASSWORD_MATCH_TYPE");
 
                 if (txtPassword.Text != confirmPassword)
                     return ValidationResult.Fail(propertyName, "Password and Confirm Password do not match.", value, "PASSWORD_MATCH");
 
-                return ValidationResult.Ok(propertyName);
-            }));
-
-            _engine.AddValidator(nameof(UserModel.Email), new DelegateValidator((value, propertyName) =>
-            {
-                if (value is string email && !string.IsNullOrWhiteSpace(email))
-                {
-                    if (!email.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase) &&
-                        !email.EndsWith("@outlook.com", StringComparison.OrdinalIgnoreCase) &&
-                        !email.EndsWith("@yahoo.com", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return ValidationResult.Fail(propertyName, "Email must be from @gmail.com, @outlook.com, or @yahoo.com", value, "EMAIL_DOMAIN");
-                    }
-                }
                 return ValidationResult.Ok(propertyName);
             }));
 
@@ -184,8 +147,8 @@ namespace ValidationFramework.Demo.Winforms
                 ConfirmPassword = txtConfirmPassword.Text
             };
 
-            // Validate - this will automatically notify subscribers
-            var results = _engine.Validate(user);
+            // Validate using both attribute and fluent validators
+            var results = _engine.ValidateWithFluent(user);
 
             // Update summary if not using LabelNotifier
             if (!chkSummaryLabel.Checked)
@@ -193,13 +156,14 @@ namespace ValidationFramework.Demo.Winforms
                 var errors = results.Where(r => !r.IsValid).ToList();
                 if (errors.Count == 0)
                 {
-                    lblSummary.Text = "? All validations passed! User registration is valid.";
+                    lblSummary.Text = "✓ All validations passed! User registration is valid.";
                     lblSummary.ForeColor = Color.Green;
-                    MessageBox.Show("Registration is valid!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Registration is valid!\n\nValidation approach:\n• Attributes: Basic rules (Required, Email, Phone, Length)\n• Fluent API: Complex rules (Password strength, Email domain)\n• Delegate: Cross-field validation (Password matching)",
+                    "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
-                    lblSummary.Text = $"Found {errors.Count} validation error(s). Please check the highlighted fields.";
+                    lblSummary.Text = $"✗ Found {errors.Count} validation error(s). Please check the highlighted fields.";
                     lblSummary.ForeColor = Color.Red;
                 }
             }
