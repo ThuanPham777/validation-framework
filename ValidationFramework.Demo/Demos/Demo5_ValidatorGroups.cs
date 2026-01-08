@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using ValidationFramework.Demo.Validators;
 using ValidationFramework.Group;
 using ValidationFramework.Validator;
@@ -44,7 +44,7 @@ namespace ValidationFramework.Demo.Demos
             {
                 var oldColor = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"âœ— Validation failed: {result.Message}");
+                Console.WriteLine($"? Validation failed: {result.Message}");
                 Console.WriteLine($"   (Stopped at first failure - this is ValidatorGroup behavior)");
                 Console.ForegroundColor = oldColor;
             }
@@ -52,16 +52,16 @@ namespace ValidationFramework.Demo.Demos
             {
                 var oldColor = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("âœ“ All rules in group passed!");
+                Console.WriteLine("? All rules in group passed!");
                 Console.ForegroundColor = oldColor;
             }
 
             // Show suggestion
             Console.WriteLine("\nTry different inputs:");
-            Console.WriteLine("  â€¢ 'ab' - Too short (fails at rule 2)");
-            Console.WriteLine("  â€¢ 'user@123' - Has special char (fails at rule 3)");
-            Console.WriteLine("  â€¢ 'user123' - Has digits (fails at rule 4)");
-            Console.WriteLine("  â€¢ 'johnsmith' - Valid (passes all rules)");
+            Console.WriteLine("  • 'ab' - Too short (fails at rule 2)");
+            Console.WriteLine("  • 'user@123' - Has special char (fails at rule 3)");
+            Console.WriteLine("  • 'user123' - Has digits (fails at rule 4)");
+            Console.WriteLine("  • 'johnsmith' - Valid (passes all rules)");
         }
     }
 }
